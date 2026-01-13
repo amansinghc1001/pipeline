@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+
+    stages {
+         stage('git checkout') {
+            steps {
+          git branch: 'main', credentialsId: '36d7a482-9383-4f7c-8085-a0f00ee00f1f', url: 'https://github.com/amansinghc1001/spring-petclinic-k8-private-.git'
+            }
+        }
+         stage('test') {
+            steps {
+               sh 'mvn test'
+            }
+        }
+        stage('scanning') {
+            steps {
+                withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'token') {
+                    sh 'mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar'
+                }
+            }
+        }
+        stage('package') {
+            steps {
+               sh 'mvn package'
+            }
+        }
+    }
+    post {
+            success{
+                mail bcc: '22051778@kiit.ac.in', body: 'this is the offer letter regarding your joining ', cc: '2206154@kiit.ac.in', from: '', replyTo: '', subject: 'offer letter', to: 'amansinghc789@gmail.com'
+            }
+            failure{
+                mail bcc: '22051778@kiit.ac.in', body: 'this is the offer letter regarding your joining ', cc: '2206154@kiit.ac.in', from: '', replyTo: '', subject: 'offer letter', to: 'amansinghc789@gmail.com'
+            }
+        }
